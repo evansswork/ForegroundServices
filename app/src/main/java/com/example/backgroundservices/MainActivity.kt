@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        handleIntent(intent)
     }
 
     private val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     private fun startTrackerService(){
         val serviceIntent = Intent(this, TrackerService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
-        textStatus.txt = "Background service sedang berjalan.."
+        textStatus.text = "Background service sedang berjalan.."
     }
 
     override fun onRequestPermissionsResult(
