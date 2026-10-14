@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -118,7 +119,33 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent?.action == ACTION_SERVICE_STOPPED_JUMP) {
-            textStatus.text = "Background Service sudah berhenti karena anda melompat/selesai latihan"
+            val jumpCount = intent.getIntExtra(EXTRA_JUMP_COUNT, 0)
+
+            if (jumpCount > 0) {
+                textStatus.text = "Latihan Selesai!\nJumlah Lompatan/Langkah: $jumpCount"
+                addExerciseToCalendar(jumpCount)
+            } else {
+                textStatus.text = "Background Service sudah berhenti karena anda melompat"
+            }
+        }
+    }
+
+    private fun addExerciseToCalendar(totalJumps: Int) {
+        val startTime = System.currentTimeMillis()
+        val endTime = startTime + (30 * 60 * 1000)
+
+        val calendarIntent = Intent(Intent.ACTION_INSERT).apply {
+            data = CalendarContract.Events.CONTENT_URI
+            putExtra(CalendarContract.Events.TITLE, "Latihan Selesai - Background Service")
+            putExtra(CalendarContract.Events.DESCRIPTION, "Selesai latihan hari ini dengan $totalJumps lompatan/langkah.")
+            putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startTime)
+            putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime)
+        }
+
+        try {
+            startActivity(calendarIntent)
+        } catch (e: Exception) {
+
         }
     }
 

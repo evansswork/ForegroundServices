@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.backgroundservices.MainActivity.Companion.ACTION_SERVICE_STOPPED_JUMP
 import com.example.backgroundservices.MainActivity.Companion.ACTION_START_EXERCISE
+import com.example.backgroundservices.MainActivity.Companion.EXTRA_JUMP_COUNT
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -74,7 +75,13 @@ class TrackerService : Service(), SensorEventListener {
 
         showJumpNotification()
 
-        // Hentikan service saat latihan selesai
+        val intent = Intent(this, MainActivity::class.java).apply {
+            action = ACTION_SERVICE_STOPPED_JUMP
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra(EXTRA_JUMP_COUNT, jumpCount)
+        }
+        startActivity(intent)
+
         stopSelf()
     }
 
