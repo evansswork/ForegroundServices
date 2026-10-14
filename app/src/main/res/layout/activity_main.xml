@@ -25,4 +25,19 @@
         android:layout_height="wrap_content"
         android:text="Start Service" />
 
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tekan Tombol untuk memulai latihan"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="1dp" />
+
+    <Button
+        android:id="@+id/btn_start_exercise"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mulai Latihan" />
+
 </LinearLayout>
