@@ -19,6 +19,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textStatus: TextView
     private lateinit var btnStart: Button
 
+    private lateinit var statusText: TextView
+    private lateinit var btnStartExercise: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -26,6 +29,18 @@ class MainActivity : AppCompatActivity() {
 
         textStatus = findViewById(R.id.statusTextView)
         btnStart = findViewById(R.id.button)
+
+        textStatus = findViewById(R.id.statusText)
+        btnStartExercise = findViewById(R.id.btn_start_exercise)
+
+        btnStartExercise.setOnClickListener {
+            val intent = Intent(this, TrackerService::class.java).apply {
+                action = ACTION_START_EXERCISE
+            }
+        }
+
+        startService(intent)
+        textStatus.text = "Latihan Dimulai.. Silahkan lompat/berjalan"
 
         btnStart.setOnClickListener {
             if (hasAllPermissions()) {
@@ -66,6 +81,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val ACTION_SERVICE_STOPPED_JUMP = "com.example.backgroundservices.ACTION_SERVICE_STOPPED_JUMP"
         const val REQUEST_CODE_PERMISSIONS = 101
+        const val ACTION_START_EXERCISE = "com.example.backgroundservices.ACTION_START_EXERCISE"
     }
 
     private fun hasAllPermissions(): Boolean{
