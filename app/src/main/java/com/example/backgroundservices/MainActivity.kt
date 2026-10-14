@@ -18,8 +18,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var textStatus: TextView
     private lateinit var btnStart: Button
-
-    private lateinit var statusText: TextView
     private lateinit var btnStartExercise: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,20 +25,25 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        textStatus = findViewById(R.id.statusTextView)
-        btnStart = findViewById(R.id.button)
-
         textStatus = findViewById(R.id.statusText)
+        btnStart = findViewById(R.id.button)
         btnStartExercise = findViewById(R.id.btn_start_exercise)
 
         btnStartExercise.setOnClickListener {
-            val intent = Intent(this, TrackerService::class.java).apply {
-                action = ACTION_START_EXERCISE
+            if (hasAllPermissions()) {
+                val serviceIntent = Intent(this, TrackerService::class.java).apply {
+                    action = ACTION_START_EXERCISE
+                }
+                ContextCompat.startForegroundService(this, serviceIntent)
+                textStatus.text = "Latihan Dimulai.. Silakan lompat/berjalan"
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    permissionToRequest,
+                    REQUEST_CODE_PERMISSIONS
+                )
             }
         }
-
-        startService(intent)
-        textStatus.text = "Latihan Dimulai.. Silahkan lompat/berjalan"
 
         btnStart.setOnClickListener {
             if (hasAllPermissions()) {
@@ -82,15 +85,16 @@ class MainActivity : AppCompatActivity() {
         const val ACTION_SERVICE_STOPPED_JUMP = "com.example.backgroundservices.ACTION_SERVICE_STOPPED_JUMP"
         const val REQUEST_CODE_PERMISSIONS = 101
         const val ACTION_START_EXERCISE = "com.example.backgroundservices.ACTION_START_EXERCISE"
+        const val EXTRA_JUMP_COUNT = "com.example.backgroundservices.EXTRA_JUMP_COUNT"
     }
 
-    private fun hasAllPermissions(): Boolean{
+    private fun hasAllPermissions(): Boolean {
         return permissionToRequest.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    private fun startTrackerService(){
+    private fun startTrackerService() {
         val serviceIntent = Intent(this, TrackerService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
         textStatus.text = "Background service sedang berjalan.."
@@ -102,30 +106,23 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == REQUEST_CODE_PERMISSIONS){
-            var allPermissionsGranted = true
-            for(result in grantResults){
-                if(result != PackageManager.PERMISSION_GRANTED){
-                    allPermissionsGranted = false
-                    break
-                }
-            }
-            if(allPermissionsGranted){
-                val serviceIntent = Intent(this, TrackerService::class.java)
-                startForegroundService(serviceIntent)
-                finish()
-            }else{
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            if (allGranted) {
+                startTrackerService()
+            } else {
                 textStatus.text = "Izin Ditolak, service tidak dapat dijalankan"
             }
         }
     }
-    private fun handleIntent(intent: Intent?){
-        if(intent?.action == ACTION_SERVICE_STOPPED_JUMP){
-            textStatus.text = "Background Service sudah berhenti karena anda melompat"
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == ACTION_SERVICE_STOPPED_JUMP) {
+            textStatus.text = "Background Service sudah berhenti karena anda melompat/selesai latihan"
         }
     }
 
-    override fun onNewIntent(intent: Intent){
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         handleIntent(intent)
